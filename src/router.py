@@ -4,7 +4,7 @@ router = APIRouter()
 
 @router.get("/")
 def health():
-    return 200
+    return {'status': 'ok'}
 
 
 @router.post("/api/request", response_model=PredictionResponse)
