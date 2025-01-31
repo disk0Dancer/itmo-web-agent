@@ -1,0 +1,29 @@
+[project]
+name = "itmo-web-agent"
+version = "0.1.0"
+description = "Web LLM-agent for ITMO University"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "aiofiles>=0.4.0",
+    "aiologger[aiofiles]>=0.7.0",
+    "fastapi[standard]>=0.115.8",
+    "feedparser>=6.0.11",
+    "gunicorn>=23.0.0",
+    "langchain>=0.3.17",
+    "langchain-community>=0.3.16",
+    "langchain-experimental>=0.3.4",
+    "langchain-huggingface>=0.1.2",
+    "langchain-ollama>=0.2.3",
+    "langchain-openai>=0.3.3",
+    "langgraph>=0.2.68",
+    "pydantic>=2.10.6",
+    "tavily-python>=0.5.0",
+    "unicorn>=2.1.1",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.4",
+    "ruff>=0.9.4",
+]
