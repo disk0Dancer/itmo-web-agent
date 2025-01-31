@@ -26,7 +26,7 @@ fmt.check:
 	uv run ruff format --check --diff
 
 test:
-	uv run pytest
+	PYTHONPATH=src/ uv run pytest
 
 build:
 	uv build src/

@@ -1,9 +1,10 @@
 import time
-from fastapi import FastAPI, Request
+import fastapi
+from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.router import router
-from src.logger import logger
+from router import router
+from logger import logger
 
 
 app = FastAPI()
@@ -54,5 +55,3 @@ async def log_requests(request: Request, call_next):
         headers=dict(response.headers),
         media_type=response.media_type,
     )
-
-
