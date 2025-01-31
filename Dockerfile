@@ -9,9 +9,7 @@ ENV PYTHONUNBUFFERED=1
 
 COPY --from=builder /uv /uvx /bin/
 
-ADD /src /app/src
-ADD pyproject.toml /app/pyproject.toml
-ADD uv.lock /app/uv.lock
+ADD . /app/
 WORKDIR /app
 
 ARG UID=10001

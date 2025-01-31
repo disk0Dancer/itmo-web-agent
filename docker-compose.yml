@@ -12,8 +12,6 @@ services:
           path: ./pyproject.toml
     networks:
       - agent_network
-    environment:
-      - HF_TOKEN=hey
     volumes:
       - .:/app
 
