@@ -8,7 +8,9 @@ install:
 	uv sync
 
 dev:
-	PYTHONPATH=src/ uv run uvicorn 'src.app:app' --host=0.0.0.0 --port=8000 --reload
+	PYTHONPATH=src/; \
+ 	source .env; \
+ 	uv run uvicorn 'src.app:app' --host=0.0.0.0 --port=8000 --reload
 
 run:
 	uv run uvicorn 'src.app:app' --host=0.0.0.0 --port=8000
@@ -18,6 +20,9 @@ lint:
 	
 lint.fix:
 	uv run ruff check --fix
+
+lint.unsafe-fix:
+	uv run ruff check --fix --unsafe-fixes
 
 fmt:
 	uv run ruff format
