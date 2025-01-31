@@ -55,8 +55,16 @@ jobs:
           CR_REGISTRY: ${{  secrets.CR_REGISTRY }}
           CR_REPOSITORY: ${{ env.IMAGE_NAME }}
           IMAGE_TAG: ${{ github.sha }}
+          
+          TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          LANGSMITH_TRACING: ${{ env.LANGSMITH_TRACING }}
+          LANGSMITH_ENDPOINT: ${{ env.LANGSMITH_ENDPOINT }}
+          LANGSMITH_API_KEY: ${{ secrets.LANGSMITH_API_KEY }}
+          LANGSMITH_PROJECT: ${{ secrets.LANGSMITH_PROJECT }}
+
         run: |
-          docker build -t cr.yandex/$CR_REGISTRY/$CR_REPOSITORY:$IMAGE_TAG .
+          docker build --env LANGSMITH_TRACING --env LANGSMITH_ENDPOINT --env TAVILY_API_KEY --env OPENAI_API_KEY --env LANGSMITH_API_KEY --env LANGSMITH_PROJECT -t cr.yandex/$CR_REGISTRY/$CR_REPOSITORY:$IMAGE_TAG .
           docker push cr.yandex/$CR_REGISTRY/$CR_REPOSITORY:$IMAGE_TAG
 
       - name: Deploy COI VM
@@ -68,12 +76,12 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
         with:
           yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
-          folder-id: 123
+          folder-id: ${{ secrets.YC_VM_DIR }}
           vm-name: yc-itmo-agent
           vm-service-account-id: ${{ secrets.YC_SA_ID }}
           vm-cores: 2
           vm-memory: 2Gb
           vm-core-fraction: 100
-          vm-subnet-id: e9b*********
+          vm-subnet-id: ${{ secrets.YC_NETWORK }}
           user-data-path: './user-data.yml'
           docker-compose-path: './docker-compose.yml'
