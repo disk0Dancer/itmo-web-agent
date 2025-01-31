@@ -75,12 +75,12 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           secrets:
-            TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
-            OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-            LANGSMITH_TRACING: ${{ env.LANGSMITH_TRACING }}
-            LANGSMITH_ENDPOINT: ${{ env.LANGSMITH_ENDPOINT }}
-            LANGSMITH_API_KEY: ${{ secrets.LANGSMITH_API_KEY }}
-            LANGSMITH_PROJECT: ${{ secrets.LANGSMITH_PROJECT }}
+            - TAVILY_API_KEY=${{ secrets.TAVILY_API_KEY }}
+            - OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+            - LANGSMITH_TRACING=${{ env.LANGSMITH_TRACING }}
+            - LANGSMITH_ENDPOINT=${{ env.LANGSMITH_ENDPOINT }}
+            - LANGSMITH_API_KEY=${{ secrets.LANGSMITH_API_KEY }}
+            - LANGSMITH_PROJECT=${{ secrets.LANGSMITH_PROJECT }}
       
       # Sign the resulting Docker image digest except on PRs.
       # This will only write to the public Rekor transparency log when the Docker
