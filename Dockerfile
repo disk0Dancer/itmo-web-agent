@@ -9,7 +9,7 @@ ENV PYTHONUNBUFFERED=1
 
 COPY --from=builder /uv /uvx /bin/
 
-ADD /src /app
+ADD /src /app/src
 ADD pyproject.toml /app/pyproject.toml
 ADD uv.lock /app/uv.lock
 WORKDIR /app
@@ -18,7 +18,7 @@ ARG UID=10001
 RUN adduser \
     --disabled-password \
     --gecos "" \
-    --home "/nonexistent" \
+    --home "/app" \
     --shell "/sbin/nologin" \
     --no-create-home \
     --uid "${UID}" \
