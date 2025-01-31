@@ -1,4 +1,3 @@
-import os
 from typing import Annotated
 
 from langchain_ollama import ChatOllama
@@ -8,7 +7,7 @@ from langchain_core.tools import InjectedToolCallId, tool
 from typing_extensions import TypedDict
 
 from langgraph.checkpoint.memory import MemorySaver
-from langgraph.graph import StateGraph, START, END
+from langgraph.graph import StateGraph, START
 from langgraph.graph.message import add_messages
 from langgraph.prebuilt import ToolNode, tools_condition
 from langgraph.types import Command, interrupt
@@ -29,7 +28,6 @@ def human_assistance(
         {
             "question": "Is this correct?",
             "name": name,
-            "birthday": birthday,
         },
     )
     if human_response.get("correct", "").lower().startswith("y"):
