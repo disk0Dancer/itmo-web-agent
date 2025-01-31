@@ -2,8 +2,8 @@ import time
 from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 
-from router import router
-from logger import logger
+from src.router import router
+from src.logger import logger
 
 
 app = FastAPI()

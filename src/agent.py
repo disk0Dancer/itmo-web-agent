@@ -1,71 +1,114 @@
 from typing import Annotated
 
-from langchain_ollama import ChatOllama
+from langchain_openai import ChatOpenAI
+# from langchain_huggingface import ChatHuggingFace, HuggingFaceEndpoint
+
+# from langchain.embeddings import init_embeddings
+# from langgraph.store.memory import InMemoryStore
+
 from langchain_community.tools.tavily_search import TavilySearchResults
+
 from langchain_core.messages import ToolMessage
-from langchain_core.tools import InjectedToolCallId, tool
-from typing_extensions import TypedDict
+from langchain_core.tools import tool
 
 from langgraph.checkpoint.memory import MemorySaver
-from langgraph.graph import StateGraph, START
+from langgraph.graph import StateGraph, START, END
 from langgraph.graph.message import add_messages
 from langgraph.prebuilt import ToolNode, tools_condition
-from langgraph.types import Command, interrupt
 
+import feedparser
+from pydantic import HttpUrl
+from typing import List
+from typing_extensions import TypedDict
+
+from src.schemas.request import AgentOutput
+
+model = "gpt-4o-mini"
+llm = ChatOpenAI(
+    model=model,
+    max_retries=2,
+)
+llm_struct = llm.with_structured_output(AgentOutput)
 
 
 class State(TypedDict):
     messages: Annotated[list, add_messages]
-    name: str
+    # user_query: str
+    # sources: List[str]
+    # ready_to_send: bool = False
+    # answer: int
 
 
 @tool
-def human_assistance(
-    name: str, tool_call_id: Annotated[str, InjectedToolCallId]
-) -> str:
-    """Request assistance from a human."""
-    human_response = interrupt(
-        {
-            "question": "Is this correct?",
-            "name": name,
-        },
-    )
-    if human_response.get("correct", "").lower().startswith("y"):
-        verified_name = name
-        response = "Correct"
-    else:
-        verified_name = human_response.get("name", name)
-        response = f"Made a correction: {human_response}"
+def get_latest_news_tool(tool_call_id: str):
+    """Возвращает последние новости ИТМО из RSS-ленты."""
 
-    state_update = {
-        "name": verified_name,
-        "messages": [ToolMessage(response, tool_call_id=tool_call_id)],
-    }
-    return Command(update=state_update)
+    def fetch_itmo_news(max_results: int = 3) -> List[HttpUrl]:
+        rss_url = "https://Itmo.ru/rss"
+        feed = feedparser.parse(rss_url)
+        return [HttpUrl(entry.link) for entry in feed.entries[:max_results]]
+
+    news_links = fetch_itmo_news()
+    return ToolMessage(content=", ".join(news_links), tool_call_id=tool_call_id)
 
 
-
-
-tool = TavilySearchResults(
-    max_results=5,
+search_tool = TavilySearchResults(
+    max_results=3,
     search_depth="advanced",
     include_answer=True,
-    include_raw_content=True,
-    include_images=True,
-    # include_domains=[...],
-    # exclude_domains=[...],
-    # name="...",            # overwrite default tool name
-    # description="...",     # overwrite default tool description
-    # args_schema=...,       # overwrite default args_schema: BaseModel
+    include_raw_content=False,
+    include_images=False,
+    # include_domains=["https://itmo.ru/", "https://news.itmo.ru/"],
+    # name="Поисковой инструмент фактов в интернете",
+    # description="используй инструмент чтобы получить информацию об университете итмо",
 )
-tools = [tool, human_assistance]
-llm = ChatOllama(model="qwen2.5-coder:0.5b")
+
+
+@tool
+async def llm_tool(tool_call_id: str):
+    """использовать для формирования классного текста, описания причины, форматирования результата"""
+    response = await llm.ainvoke(tool_call_id)
+    return response
+
+
+async def reasoning_summary(messages):
+    """Return reasoning for answer, make summary for all steps"""
+    return await llm.ainvoke(
+        f"make a summary why agent responded with selcted answer, thoughts process below:\n{process_msgs(messages)}"
+    )
+
+
+def process_msgs(x):
+    return "\n".join([f"{i}. {msg.type} {msg.content}" for i, msg in enumerate(x)])
+
+
+async def formatting(messages):
+    """return user formatted data"""
+    return await llm.ainvoke(
+        f"respond only with digit - correct option:\n{process_msgs([messages[1], messages[-1]])}"
+    )
+
+
+async def get_sources(messages):
+    """return sources"""
+    return await llm.ainvoke(
+        f"return sources urls http-like, separated by ',':\n{process_msgs(messages)}"
+    )
+
+
+tools = [
+    llm_tool,
+    search_tool,
+    get_latest_news_tool,
+    # reasoning_summary,
+    # formatting,
+]
+
 llm_with_tools = llm.bind_tools(tools)
 
 
-def chatbot(state: State):
-    message = llm_with_tools.invoke(state["messages"])
-    assert len(message.tool_calls) <= 1
+async def chatbot(state: State):
+    message = await llm_with_tools.ainvoke(state["messages"])
     return {"messages": [message]}
 
 
@@ -79,8 +122,19 @@ graph_builder.add_conditional_edges(
     "chatbot",
     tools_condition,
 )
+
 graph_builder.add_edge("tools", "chatbot")
 graph_builder.add_edge(START, "chatbot")
+graph_builder.add_edge("chatbot", END)
 
 memory = MemorySaver()
-graph = graph_builder.compile(checkpointer=memory)
+# store = InMemoryStore(
+#     index={
+#         "embed": init_embeddings("openai:text-embedding-3-small"),
+#         "dims": 1536,
+#     }
+# )
+graph = graph_builder.compile(
+    checkpointer=memory,
+    # store=store
+)
