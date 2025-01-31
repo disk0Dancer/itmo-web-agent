@@ -53,6 +53,7 @@ jobs:
       - name: Yandex Cloud CR "Login" Action for GitHub Actions
         uses: yc-actions/yc-cr-login@v0.1-alpha
         with:
+          name: "itmo"
           yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
       
       
