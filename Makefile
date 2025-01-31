@@ -34,4 +34,4 @@ test:
 	PYTHONPATH=src/ uv run pytest
 
 build:
-	uv build src/
+	uv build
