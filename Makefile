@@ -6,6 +6,8 @@ install:
 	@echo "installing dependencies"
 	uv venv
 	uv sync
+	cp .env.example .env
+	@echo "fill .env"
 
 dev:
 	PYTHONPATH=src/; \
