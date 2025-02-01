@@ -1,3 +1,16 @@
+Не получил ответа в чате, прикремпил url для проверяющего
+
+# Call api
+service available at 
+```
+http://158.160.60.95:8000
+```
+
+checkout api docs 
+```
+http://158.160.60.95:8000/docs
+```
+
 # Quick start
 
 ```bash
