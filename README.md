@@ -3,12 +3,12 @@
 # Call api
 service available at 
 ```
-http://158.160.60.95:8000
+https://sheep-artistic-sadly.ngrok-free.app/
 ```
 
 checkout api docs 
 ```
-http://158.160.60.95:8000/docs
+https://sheep-artistic-sadly.ngrok-free.app/docs
 ```
 
 # Quick start
